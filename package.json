@@ -1,0 +1,24 @@
+{
+"name": "api-todo-ci",
+"version": "1.0.0",
+"description": "API TODO avec CI/CD",
+"main": "server.js",
+"scripts": {
+"start": "node server.js",
+"test": "jest --coverage",
+"test:watch": "jest --watch"
+},
+"keywords": ["api", "todo", "ci", "cd"],
+"author": "Votre Prénom",
+"license": "MIT",
+"dependencies": {
+"express": "^4.18.2"
+},
+"devDependencies": {
+"jest": "^29.7.0",
+"supertest": "^6.3.3"
+},
+"engines": {
+"node": ">=18.0.0"
+}
+}
