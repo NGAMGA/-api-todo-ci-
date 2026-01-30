@@ -1,9 +1,11 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
+
 env:
   NODE_VERSION: '18'
 
@@ -14,12 +16,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Où suis-je ?
+        run: pwd
+
+      - name: Lister les fichiers
+        run: ls -la
+
+      - name: Vérifier app.js et server.js
+        run: |
+          echo "---- app.js ----"
+          ls app.js
+          echo "---- server.js ----"
+          ls server.js
+
       - name: Install dependencies
         run: npm ci
+
       - name: Check syntax
         run: node --check app.js server.js
 
@@ -30,14 +48,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run tests
         run: npm test
+
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         with:
@@ -51,12 +73,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
+
       - name: Install dependencies
         run: npm ci
+
       - name: Build success
         run: echo "Build completed successfully!"
 
