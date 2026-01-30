@@ -1,11 +1,11 @@
-const express = require('express');
+﻿const express = require('express');
 const app = express();
 // Middleware pour parser le JSON
 app.use(express.json());
-// Base de données en mémoire (simple tableau)
+// Base de donnÃ©es en mÃ©moire (simple tableau)
 let todos = [
 { id: 1, title: 'Apprendre CI/CD', completed: false },
-{ id: 2, title: 'Déployer sur Render', completed: false }
+{ id: 2, title: 'DÃ©ployer sur Render', completed: false }
 ];
 let nextId = 3;
 // ========== ROUTES ==========
@@ -15,8 +15,8 @@ res.json({
 message: 'API TODO - CI/CD Demo',
 endpoints: {
 'GET /todos': 'Liste des todos',
-'GET /todos/:id': 'Un todo spécifique',
-'POST /todos': 'Créer un todo',
+'GET /todos/:id': 'Un todo spÃ©cifique',
+'POST /todos': 'CrÃ©er un todo',
 'PUT /todos/:id': 'Modifier un todo',
 'DELETE /todos/:id': 'Supprimer un todo',
 'GET /health': 'Status de l\'API'
@@ -24,23 +24,23 @@ endpoints: {
 version: '1.0.0'
 });
 });
-// GET /todos - Récupérer tous les todos
+// GET /todos - RÃ©cupÃ©rer tous les todos
 app.get('/todos', (req, res) => {
 res.json({
 count: todos.length,
 todos: todos
 });
 });
-// GET /todos/:id - Récupérer un todo par ID
+// GET /todos/:id - RÃ©cupÃ©rer un todo par ID
 app.get('/todos/:id', (req, res) => {
 const id = parseInt(req.params.id);
 const todo = todos.find(t => t.id === id);
 if (!todo) {
-return res.status(404).json({ error: 'Todo non trouvé' });
+return res.status(404).json({ error: 'Todo non trouvÃ©' });
 }
 res.json(todo);
 });
-// POST /todos - Créer un nouveau todo
+// POST /todos - CrÃ©er un nouveau todo
 app.post('/todos', (req, res) => {
 const { title } = req.body;
 // Validation
@@ -54,7 +54,7 @@ completed: false
 };
 todos.push(newTodo);
 res.status(201).json({
-message: 'Todo créé',
+message: 'Todo crÃ©Ã©',
 todo: newTodo
 });
 });
@@ -64,13 +64,13 @@ const id = parseInt(req.params.id);
 const { title, completed } = req.body;
 const todo = todos.find(t => t.id === id);
 if (!todo) {
-return res.status(404).json({ error: 'Todo non trouvé' });
+return res.status(404).json({ error: 'Todo non trouvÃ©' });
 }
-// Mise à jour
+// Mise Ã  jour
 if (title !== undefined) todo.title = title.trim();
 if (completed !== undefined) todo.completed = completed;
 res.json({
-message: 'Todo mis à jour',
+message: 'Todo mis Ã  jour',
 todo: todo
 });
 });
@@ -79,7 +79,7 @@ app.delete('/todos/:id', (req, res) => {
 const id = parseInt(req.params.id);
 const index = todos.findIndex(t => t.id === id);
 if (index === -1) {
-return res.status(404).json({ error: 'Todo non trouvé' });
+return res.status(404).json({ error: 'Todo non trouvÃ©' });
 }
 todos.splice(index, 1);
 res.status(204).send();
@@ -95,6 +95,6 @@ todos_count: todos.length
 });
 // Route 404
 app.use((req, res) => {
-res.status(404).json({ error: 'Route non trouvée' });
+res.status(404).json({ error: 'Route non trouvÃ©e' });
 });
 module.exports = app;
