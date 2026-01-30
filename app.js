@@ -12,7 +12,7 @@ let nextId = 3;
 // GET / - Page d'accueil
 app.get('/', (req, res) => {
 res.json({
-message: 'API TODO - CI/CD Demo',
+message: 'API TODO - Déploiement Automatique Fonctionne !',
 endpoints: {
 'GET /todos': 'Liste des todos',
 'GET /todos/:id': 'Un todo spÃ©cifique',
