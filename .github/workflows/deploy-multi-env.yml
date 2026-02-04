@@ -1,4 +1,4 @@
-name: Deploy Multi-Environnements
+name: Deploy Multi-Environnements 
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
 jobs:
 
   test:
-    name: Tests
+    name: test
     runs-on: ubuntu-latest
 
     steps:
