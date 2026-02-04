@@ -110,3 +110,6 @@ Ressources
 - Semantic Versioning: https://semver.org/
 - Conventional Commits: https://www.conventionalcommits.org/
 
+
+Dernière mise à jour : 4 février 2026
+
