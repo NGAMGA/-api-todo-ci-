@@ -84,13 +84,17 @@ return res.status(404).json({ error: 'Todo non trouvÃ©' });
 todos.splice(index, 1);
 res.status(204).send();
 });
-// GET /health - Status de l'API
-app.get('/health', (req, res) => {
+// GET /stats - Statistiques
+app.get('/stats', (req, res) => {
+const completed = todos.filter(t => t.completed).length;
+const active = todos.filter(t => !t.completed).length;
 res.json({
-status: 'healthy',
-timestamp: new Date().toISOString(),
-uptime: process.uptime(),
-todos_count: todos.length
+total: todos.length,
+completed: completed,
+active: active,
+completion_rate: todos.length > 0
+? Math.round((completed / todos.length) * 100)
+: 0
 });
 });
 // Route 404
