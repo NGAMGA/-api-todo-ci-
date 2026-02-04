@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 env:
   NODE_VERSION: '18'
 
@@ -16,14 +19,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
       - name: Install dependencies
         run: npm install
+
       - name: Run tests
         run: npm test
+
       - name: Tests passed
         run: echo "All tests passed successfully"
 
@@ -45,8 +52,10 @@ jobs:
             echo "Staging deployment failed with status $response"
             exit 1
           fi
+
       - name: Wait for deployment
         run: sleep 60
+
       - name: Health check Staging
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" https://api-todo-tania-staging.onrender.com/health)
@@ -70,28 +79,32 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
-      # Étape cruciale de ton amie pour éviter l'erreur de tag
       - name: Fetch tags
-        run: git fetch --tags
+        run: git fetch --tags || true
 
       - name: Setup Git identity
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      - name: Create Version Tag
+      - name: Create and Push Version Tag
         id: tag
-        run: |
-          tag_count=$(git tag | grep -c "^v" || echo "0")
-          new_version="v1.0.$((tag_count + 1))"
-          echo "version=$new_version" >> $GITHUB_OUTPUT
-          git tag -a "$new_version" -m "Release $new_version"
-
-      - name: Push Version Tag
-        run: git push origin ${{ steps.tag.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag_count=$(git tag -l 'v*' | wc -l | tr -d '[:space:]' || echo "0")
+          new_version="v1.0.$((tag_count + 1))"
+          echo "Calculated tag: $new_version"
+          
+          if git rev-parse --verify "refs/tags/$new_version" >/dev/null 2>&1; then
+            echo "Tag $new_version already exists, skipping."
+          else
+            git tag -a "$new_version" -m "Release $new_version"
+            git push origin "$new_version"
+          fi
+          echo "version=$new_version" >> $GITHUB_OUTPUT
 
       - name: Trigger Production Deploy
         run: |
