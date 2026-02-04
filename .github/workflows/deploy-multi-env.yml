@@ -1,4 +1,4 @@
-name: Deploy Multi-Environnements
+name: Deploy Multi-Environments
 
 on:
   push:
@@ -30,10 +30,6 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Tests passed
-        run: echo "All tests passed successfully"
-
-
   deploy-staging:
     name: Deploy Staging
     runs-on: ubuntu-latest
@@ -45,30 +41,28 @@ jobs:
       url: https://api-todo-tania-staging.onrender.com
 
     steps:
-      - name: Trigger Staging Deploy
+      - name: Trigger Render Staging Deploy
         run: |
           response=$(curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_STAGING }} -w "%{http_code}" -o /dev/null -s)
-          if [ $response -eq 200 ] || [ $response -eq 201 ]; then
-            echo "Staging deployment triggered successfully"
+          if [ "$response" -eq 200 ] || [ "$response" -eq 201 ]; then
+            echo "Staging deployment triggered"
           else
-            echo "Staging deployment failed with status $response"
+            echo "Staging deploy failed with status $response"
             exit 1
           fi
 
       - name: Wait for deployment
-        run: |
-          echo "Waiting 60 seconds for deployment to complete..."
-          sleep 60
+        run: sleep 60
 
-      - name: Health check Staging
+      - name: Health check staging
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" https://api-todo-tania-staging.onrender.com/health)
-          if [ $response -eq 200 ]; then
-            echo "Staging is healthy"
+          if [ "$response" -eq 200 ]; then
+            echo "Staging healthy"
           else
-            echo "Staging health check returned $response"
+            echo "Staging health check failed"
+            exit 1
           fi
-
 
   deploy-production:
     name: Deploy Production
@@ -78,7 +72,7 @@ jobs:
 
     environment:
       name: production
-      url: https://api-todo-tania-prod.onrender.com
+      url: https://api-todo-ci-tania-prod.onrender.com
 
     steps:
       - name: Checkout
@@ -86,50 +80,46 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create Version Tag
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Setup Git identity
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Create version tag
         id: tag
         run: |
-          tag_count=$(git tag | grep -c "^v" || echo "0")
-          new_version="v1.0.$((tag_count + 1))"
-          echo "version=$new_version" >> $GITHUB_OUTPUT
-          echo "New version: $new_version"
+          count=$(git tag | grep -c "^v" || true)
+          version="v1.0.$((count + 1))"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          git tag -a "$version" -m "Release $version"
 
-      - name: Trigger Production Deploy
+      - name: Push tag
+        run: git push origin ${{ steps.tag.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger Render Production Deploy
         run: |
           response=$(curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_PROD }} -w "%{http_code}" -o /dev/null -s)
-          if [ $response -eq 200 ] || [ $response -eq 201 ]; then
-            echo "Production deployment triggered successfully"
+          if [ "$response" -eq 200 ] || [ "$response" -eq 201 ]; then
+            echo "Production deployment triggered"
           else
-            echo "Production deployment failed with status $response"
+            echo "Production deploy failed with status $response"
             exit 1
           fi
 
       - name: Wait for deployment
-        run: |
-          echo "Waiting 60 seconds for deployment to complete..."
-          sleep 60
+        run: sleep 60
 
-      - name: Health check Production
+      - name: Health check production
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://api-todo-tania-prod.onrender.com/health)
-          if [ $response -eq 200 ]; then
-            echo "Production is healthy"
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://api-todo-ci-tania-prod.onrender.com/health)
+          if [ "$response" -eq 200 ]; then
+            echo "Production healthy"
           else
-            echo "Production health check failed with status $response"
+            echo "Production health check failed"
             exit 1
           fi
-
-      - name: Push Version Tag
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git tag -a ${{ steps.tag.outputs.version }} -m "Release ${{ steps.tag.outputs.version }}"
-          git push origin ${{ steps.tag.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deployment Complete
-        run: |
-          echo "Deployment to production complete!"
-          echo "Version: ${{ steps.tag.outputs.version }}"
-          echo "URL: https://api-todo-tania-prod.onrender.com"
