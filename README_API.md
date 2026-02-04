@@ -22,7 +22,7 @@ Endpoints API
 
 Méthode | Route | Description | Exemple
 ---|---|---|---
-GET | / | Infos de l'API | curl https://api-todo-PRENOM-prod.onrender.com/
+GET | / | Infos de l'API | curl https://api-todo-tania-prod.onrender.com/
 GET | /todos | Liste tous les todos | curl https://api-todo-tania-prod.onrender.com/todos
 GET | /todos/:id | Un todo spécifique | curl https://api-todo-tania-prod.onrender.com/todos/1
 POST | /todos | Créer un todo | curl -X POST ... -d '{"title":"..."}'
